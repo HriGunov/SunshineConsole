@@ -12,42 +12,74 @@ using System.Drawing.Imaging;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
+using SunshineConsole.Sections;
 
 namespace SunshineConsole{
-	/*public static class SunshineMain{ // Here's a quick example.
-		public static void Main(){
-			ConsoleWindow console = new ConsoleWindow(20,60,"Sunshine Console: The Roguelike");
+	 public static class SunshineMain{ // Here's a quick example.
+		 public static void Main(){
+			ConsoleWindow console = new ConsoleWindow(21,60,"Sunshine Console: The Roguelike");
 			int row = 10; // These 2 ints are the player's position.
 			int col = 40;
-			while(console.WindowUpdate()){ // WindowUpdate() returns false if the window is closed, so be sure to check for that.
-				for(int i=0;i<20;++i){
-					console.Write(i,0,"".PadRight(60,'#'),Color4.DimGray); // Let's make our black screen look more like a dungeon.
-				}
-				console.Write(row,col,'@',Color4.White); // And of course, our player character.
-				if(console.KeyPressed){ // KeyPressed returns true if there's a new key to grab.
+		     
+            var sectionManager = new SectionManager(console);
+
+
+            //Border Flags Example
+            //sectionManager.AddSection("BorderFlags Example", new BorderedSection(new Section(0, 5, 10, 10, 2), new Symbol((char)219),BorderedSection.BorderSides.Rigth | BorderedSection.BorderSides.Left| BorderedSection.BorderSides.Top));
+
+            //Section Laying 
+		    sectionManager.AddSection("Base", new Section(0, 0, 21, 60));
+
+            sectionManager.AddSection("Section Layer 1", new BorderedSection(new Section(2, 3, 10, 25, 1), new Symbol((char)219,Color4.Red)));
+		    sectionManager.AddSection("Section Layer 2", new BorderedSection(new Section(0, 0, 10, 10, 2), new Symbol((char)219, Color4.Green)));
+		    sectionManager.AddSection("Section Layer 3", new BorderedSection(new Section(7, 5, 7, 7, 3), new Symbol((char)219, Color4.Blue)));
+
+		     sectionManager.PrintToConsole();
+
+
+
+		     // var baseS = sectionManager.GetSection("Base");
+
+            while (console.WindowUpdate()){  // WindowUpdate() returns false if the window is closed, so be sure to check for that.
+               // baseS.Clear();
+
+                Section movingSection = sectionManager.GetSection("Section Layer 2");
+                movingSection.SetTextLine("Testing".ToSymbolArray(),1,1);
+                movingSection.SetTextLine("This".ToSymbolArray(), 2, 1);
+                movingSection.SetTextLine("Section".ToSymbolArray(), 3, 1);
+
+
+                if (console.KeyPressed){ // KeyPressed returns true if there's a new key to grab.
 					switch(console.GetKey()){ // If KeyPressed is false, GetKey() will return Key.Unknown.
 					case Key.Up:
-					row = Math.Max(0,row-1); // In our basic example, we only check for arrow keys.
+					    movingSection.PinY--;
+                        row = Math.Max(0,row-1); // In our basic example, we only check for arrow keys.
 					break;
 					case Key.Down:
-					row = Math.Min(row+1,19); // We make sure that row & col don't go beyond the edges of the map.
+					    movingSection.PinY++;
+                        row = Math.Min(row+1,19); // We make sure that row & col don't go beyond the edges of the map.
 					break;
 					case Key.Left:
-					col = Math.Max(0,col-1);
+					    movingSection.PinX--;
+                            col = Math.Max(0,col-1);
 					break;
 					case Key.Right:
-					col = Math.Min(col+1,59);
+					    movingSection.PinX++;
+                            col = Math.Min(col+1,59);
 					break;
 					}
 				}
-				System.Threading.Thread.Sleep(10); // A call to Sleep() will prevent our program from using 100% CPU all the time.
+             //   baseS.Clear();
+                sectionManager.PrintToConsole();
+                System.Threading.Thread.Sleep(10); // A call to Sleep() will prevent our program from using 100% CPU all the time.*/
 			} // And that's all you really need to get up and running!
 		}
-	}*/
+	} 
 	public class ConsoleWindow : GameWindow{
 		protected char[,] chars;
 		protected Color4[,] colors;
@@ -63,9 +95,9 @@ namespace SunshineConsole{
 		protected int num_elements;
 		protected static float half_height;
 		protected static float half_width;
-		protected const int font_w = 8;
+		protected const int font_w = 12;
 		protected const int font_h = 12;
-		protected const float font_texcoord_width = 1.0f / 128.0f;
+		protected const float font_texcoord_width = 1.0f / 256.0f;
 		protected static readonly float font_texcoord_padding = font_texcoord_width;
 		public ConsoleWindow(int rows,int columns,string window_title) : base(columns*font_w,rows*font_h,GraphicsMode.Default,window_title){
 			VSync = VSyncMode.On;
@@ -114,7 +146,8 @@ namespace SunshineConsole{
 		public void Write(int row,int col,char ch,Color4 color){ Write(row,col,"" + ch,color,Color4.Black); }
 		public void Write(int row,int col,char ch,Color4 color,Color4 bgcolor){ Write(row,col,"" + ch,color,bgcolor); }
 		public void Write(int row,int col,string s,Color4 color){ Write(row,col,s,color,Color4.Black); }
-		public void Write(int row,int col,string s,Color4 color,Color4 bgcolor){
+	    public void Write(int row, int col, Symbol symbol) { Write(row, col, symbol.Character,symbol.FontColor, symbol.BackgroundColor); }
+        public void Write(int row,int col,string s,Color4 color,Color4 bgcolor){
 			int i = 0;
 			foreach(char ch in s){
 				if(InBounds(row,col+i)){
@@ -219,7 +252,7 @@ namespace SunshineConsole{
 			int id = GL.GenTexture();
 			GL.BindTexture(TextureTarget.Texture2D,id);
 			Assembly embedded = Assembly.GetExecutingAssembly();
-			Stream file = embedded.GetManifestResourceStream("SunshineConsole.dsc8x12.png");
+			Stream file = embedded.GetManifestResourceStream("SunshineConsole.tileset12x12.png");
 			Bitmap bmp = new Bitmap(file);
 			BitmapData bmp_data = bmp.LockBits(new Rectangle(0,0,bmp.Width,bmp.Height),ImageLockMode.ReadOnly,System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 			GL.TexImage2D(TextureTarget.Texture2D,0,PixelInternalFormat.Rgba,bmp_data.Width,bmp_data.Height,0,OpenTK.Graphics.OpenGL.PixelFormat.Bgra,PixelType.UnsignedByte,bmp_data.Scan0);
