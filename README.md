@@ -86,4 +86,4 @@ OpenTK has a lot of great features that you can access, because ConsoleWindow in
 
 ![SCRL0](https://raw.githubusercontent.com/derrickcreamer/SunshineConsole/gh-pages/images/sunshineroguelike.png?raw=true)
 
-![Tileset](http://dwarffortresswiki.org/images/c/c0/Cheepicus_12x12.png)
+[Tileset](http://dwarffortresswiki.org/index.php/File:Cheepicus_12x12.png)
