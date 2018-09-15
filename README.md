@@ -85,3 +85,5 @@ console.ResumeUpdates();
 OpenTK has a lot of great features that you can access, because ConsoleWindow inherits from OpenTK.GameWindow. Among these are event handlers for window closing, focus changing, and even mouse input! Learn more at the [GameWindow reference](http://www.opentk.com/files/doc/class_open_t_k_1_1_game_window.html) and the [OpenTK docs](http://www.opentk.com/doc).
 
 ![SCRL0](https://raw.githubusercontent.com/derrickcreamer/SunshineConsole/gh-pages/images/sunshineroguelike.png?raw=true)
+
+![Tileset](http://dwarffortresswiki.org/images/c/c0/Cheepicus_12x12.png)
